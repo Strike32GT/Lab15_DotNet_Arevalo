@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="GatewayApi/GatewayApi.csproj" />
+  <Project Path="Reservas.Api/Reservas.Api.csproj" />
+  <Project Path="Restaurante.Api/Restaurante.Api.csproj" />
+  <Project Path="Restaurante.Datos/Restaurante.Datos.csproj" />
+  <Project Path="Restaurante.Entidades/Restaurante.Entidades.csproj" />
+  <Project Path="Restaurante.Negocio/Restaurante.Negocio.csproj" />
+</Solution>

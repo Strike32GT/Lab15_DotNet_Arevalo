@@ -1,0 +1,101 @@
+{
+  "_comentario": "EJEMPLO para la nube. Reemplace los nombres por los suyos y guarde el resultado como GatewayApi/ocelot.json. No contiene secretos: la clave JWT se configura como variable de entorno Jwt__Clave.",
+  "GlobalConfiguration": {
+    "BaseUrl": "https://lab15-gateway-earevalo.runasp.net",
+    "RequestIdKey": "Oc-RequestId"
+  },
+  "Routes": [
+    {
+      "RouteId": "auth-publico",
+      "UpstreamPathTemplate": "/gateway/auth{everything}",
+      "UpstreamHttpMethod": [ "POST" ],
+      "DownstreamPathTemplate": "/api/auth{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        { "Host": "lab15-restaurante-earevalo.runasp.net", "Port": 443 }
+      ]
+    },
+    {
+      "RouteId": "auth-perfil-protegido",
+      "UpstreamPathTemplate": "/gateway/auth/perfil",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/auth/perfil",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        { "Host": "lab15-restaurante-earevalo.runasp.net", "Port": 443 }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "RouteId": "platos-get-publico",
+      "UpstreamPathTemplate": "/gateway/platos{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/platos{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        { "Host": "lab15-restaurante-earevalo.runasp.net", "Port": 443 }
+      ]
+    },
+    {
+      "RouteId": "categorias-get-publico",
+      "UpstreamPathTemplate": "/gateway/categorias{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/categorias{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        { "Host": "lab15-restaurante-earevalo.runasp.net", "Port": 443 }
+      ]
+    },
+    {
+      "RouteId": "platos-escritura-protegida",
+      "UpstreamPathTemplate": "/gateway/platos{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/api/platos{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        { "Host": "lab15-restaurante-earevalo.runasp.net", "Port": 443 }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamHeaderTransform": {
+        "Location": "https://lab15-restaurante-earevalo.runasp.net/api, https://lab15-gateway-earevalo.runasp.net/gateway"
+      }
+    },
+    {
+      "RouteId": "categorias-escritura-protegida",
+      "UpstreamPathTemplate": "/gateway/categorias{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/api/categorias{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        { "Host": "lab15-restaurante-earevalo.runasp.net", "Port": 443 }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "DownstreamHeaderTransform": {
+        "Location": "https://lab15-restaurante-earevalo.runasp.net/api, https://lab15-gateway-earevalo.runasp.net/gateway"
+      }
+    },
+    {
+      "RouteId": "reservas-protegida",
+      "UpstreamPathTemplate": "/gateway/reservas{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/reservas{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        { "Host": "lab15-reservas-earevalo.runasp.net", "Port": 443 }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    }
+  ]
+}

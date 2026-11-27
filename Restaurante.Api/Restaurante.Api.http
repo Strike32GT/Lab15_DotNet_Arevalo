@@ -1,0 +1,228 @@
+@host = http://localhost:5080
+@contentType = application/json
+
+# ============================================================
+# API Restaurante - autenticación JWT
+# Ejecutar las solicitudes en orden. Los tokens se toman de las
+# respuestas de login y se reutilizan en las solicitudes protegidas.
+# ============================================================
+
+### 01. Login Chef - 200
+# @name loginChef
+POST {{host}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "correo": "chef@restaurante.com",
+  "clave": "Chef123!"
+}
+
+### 02. Login Mesero - 200
+# @name loginMesero
+POST {{host}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "correo": "mesero@restaurante.com",
+  "clave": "Mesero123!"
+}
+
+### 03. Login con clave incorrecta - 401
+POST {{host}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "correo": "chef@restaurante.com",
+  "clave": "ClaveIncorrecta123!"
+}
+
+### 04. Login con correo inexistente - 401
+POST {{host}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "correo": "noexiste@restaurante.com",
+  "clave": "Cualquiera123!"
+}
+
+### 05. Registrar usuario nuevo (la solicitud intenta enviar rol Chef) - 201
+# @name registroNuevo
+POST {{host}}/api/auth/registro
+Content-Type: {{contentType}}
+
+{
+  "correo": "nuevo.http@restaurante.com",
+  "clave": "Nuevo123!",
+  "rol": "Chef"
+}
+
+### 06. Registrar correo duplicado - 409
+POST {{host}}/api/auth/registro
+Content-Type: {{contentType}}
+
+{
+  "correo": "nuevo.http@restaurante.com",
+  "clave": "Nuevo123!"
+}
+
+### 07. Registrar con clave corta - 400
+POST {{host}}/api/auth/registro
+Content-Type: {{contentType}}
+
+{
+  "correo": "clave.corta@restaurante.com",
+  "clave": "123"
+}
+
+### 08. Perfil con token Chef - 200
+GET {{host}}/api/auth/perfil
+Authorization: Bearer {{loginChef.response.body.$.token}}
+
+### 09. Perfil con token Mesero - 200
+GET {{host}}/api/auth/perfil
+Authorization: Bearer {{loginMesero.response.body.$.token}}
+
+### 10. Perfil sin token - 401
+GET {{host}}/api/auth/perfil
+
+### 11. Listar categorías sin token - 200
+GET {{host}}/api/categorias
+
+### 12. Listar platos sin token - 200
+GET {{host}}/api/platos
+
+### 13. Obtener plato sin token - 200
+GET {{host}}/api/platos/1
+
+### 14. Consultar plato inexistente - 404
+GET {{host}}/api/platos/99999
+
+### 15. Crear categoría sin token - 401
+POST {{host}}/api/categorias
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Categoría sin token",
+  "descripcion": "Debe responder 401"
+}
+
+### 16. Crear categoría con Mesero - 403
+POST {{host}}/api/categorias
+Content-Type: {{contentType}}
+Authorization: Bearer {{loginMesero.response.body.$.token}}
+
+{
+  "nombre": "Categoría del mesero",
+  "descripcion": "Debe responder 403"
+}
+
+### 17. Crear categoría con Chef - 201
+# @name crearCategoria
+POST {{host}}/api/categorias
+Content-Type: {{contentType}}
+Authorization: Bearer {{loginChef.response.body.$.token}}
+
+{
+  "nombre": "Temporada HTTP",
+  "descripcion": "Categoría creada con rol Chef"
+}
+
+### 18. Crear categoría duplicada con Chef - 409
+POST {{host}}/api/categorias
+Content-Type: {{contentType}}
+Authorization: Bearer {{loginChef.response.body.$.token}}
+
+{
+  "nombre": "Temporada HTTP",
+  "descripcion": "Categoría repetida"
+}
+
+### 19. Actualizar categoría con Chef - 204
+PUT {{host}}/api/categorias/{{crearCategoria.response.body.$.categoriaId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{loginChef.response.body.$.token}}
+
+{
+  "nombre": "Temporada HTTP actualizada",
+  "descripcion": "Actualizada con rol Chef",
+  "activo": true
+}
+
+### 20. Eliminar categoría con Mesero - 403
+DELETE {{host}}/api/categorias/{{crearCategoria.response.body.$.categoriaId}}
+Authorization: Bearer {{loginMesero.response.body.$.token}}
+
+### 21. Eliminar categoría con Chef - 204
+DELETE {{host}}/api/categorias/{{crearCategoria.response.body.$.categoriaId}}
+Authorization: Bearer {{loginChef.response.body.$.token}}
+
+### 22. Consultar categoría eliminada - 404
+GET {{host}}/api/categorias/{{crearCategoria.response.body.$.categoriaId}}
+
+### 23. Crear plato con Chef - 201
+# @name crearPlato
+POST {{host}}/api/platos
+Content-Type: {{contentType}}
+Authorization: Bearer {{loginChef.response.body.$.token}}
+
+{
+  "nombre": "Plato HTTP",
+  "descripcion": "Plato creado con rol Chef",
+  "precio": 25.50,
+  "disponible": true,
+  "categoriaId": 1
+}
+
+### 24. Crear plato con Mesero - 403
+POST {{host}}/api/platos
+Content-Type: {{contentType}}
+Authorization: Bearer {{loginMesero.response.body.$.token}}
+
+{
+  "nombre": "Plato del mesero",
+  "precio": 10.00,
+  "disponible": true,
+  "categoriaId": 1
+}
+
+### 25. Crear plato con precio inválido - 400
+POST {{host}}/api/platos
+Content-Type: {{contentType}}
+Authorization: Bearer {{loginChef.response.body.$.token}}
+
+{
+  "nombre": "Precio inválido",
+  "precio": 0,
+  "disponible": true,
+  "categoriaId": 1
+}
+
+### 26. Actualizar plato con Chef - 204
+PUT {{host}}/api/platos/{{crearPlato.response.body.$.platoId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{loginChef.response.body.$.token}}
+
+{
+  "nombre": "Plato HTTP actualizado",
+  "descripcion": "Plato actualizado con rol Chef",
+  "precio": 27.00,
+  "disponible": false,
+  "categoriaId": 1
+}
+
+### 27. Eliminar plato con Mesero - 403
+DELETE {{host}}/api/platos/{{crearPlato.response.body.$.platoId}}
+Authorization: Bearer {{loginMesero.response.body.$.token}}
+
+### 28. Eliminar plato con Chef - 204
+DELETE {{host}}/api/platos/{{crearPlato.response.body.$.platoId}}
+Authorization: Bearer {{loginChef.response.body.$.token}}
+
+### 29. Consultar plato eliminado - 404
+GET {{host}}/api/platos/{{crearPlato.response.body.$.platoId}}
+
+### 30. Contrato OpenAPI - 200
+GET {{host}}/swagger/v1/swagger.json
+
+### 31. Swagger UI - 200
+GET {{host}}/swagger/index.html

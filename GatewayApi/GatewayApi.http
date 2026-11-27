@@ -1,0 +1,125 @@
+@host = http://localhost:5000
+
+# 1) Ejecute los dos login y copie el valor de "token" en las variables.
+#    Si su cliente soporta variables de respuesta, puede reemplazar las
+#    variables por {{loginChef.response.body.$.token}}.
+@tokenChef = PEGA_AQUI_EL_TOKEN_DEL_CHEF
+@tokenMesero = PEGA_AQUI_EL_TOKEN_DEL_MESERO
+
+### Login Chef (200)
+POST {{host}}/gateway/auth/login
+Content-Type: application/json
+
+{
+  "correo": "chef@restaurante.com",
+  "clave": "Chef123!"
+}
+
+### Login Mesero (200)
+POST {{host}}/gateway/auth/login
+Content-Type: application/json
+
+{
+  "correo": "mesero@restaurante.com",
+  "clave": "Mesero123!"
+}
+
+### Perfil con token Chef (200)
+GET {{host}}/gateway/auth/perfil
+Authorization: Bearer {{tokenChef}}
+
+### Perfil sin token (401)
+GET {{host}}/gateway/auth/perfil
+
+### Listar platos sin token (200)
+GET {{host}}/gateway/platos
+
+### Obtener plato 1 sin token (200)
+GET {{host}}/gateway/platos/1
+
+### Listar categorías sin token (200)
+GET {{host}}/gateway/categorias
+
+### Platos de la categoría 1 sin token (200)
+GET {{host}}/gateway/categorias/1/platos
+
+### Listar reservas con token Chef (200)
+GET {{host}}/gateway/reservas
+Authorization: Bearer {{tokenChef}}
+
+### Obtener reserva 1 con token Chef (200)
+GET {{host}}/gateway/reservas/1
+Authorization: Bearer {{tokenChef}}
+
+### Filtrar reservas por estado (200)
+GET {{host}}/gateway/reservas?estado=Confirmada
+Authorization: Bearer {{tokenChef}}
+
+### Listar reservas sin token (401)
+GET {{host}}/gateway/reservas
+
+### Crear plato con token Chef (201)
+# Copie el "platoId" de la respuesta para las siguientes pruebas.
+POST {{host}}/gateway/platos
+Authorization: Bearer {{tokenChef}}
+Content-Type: application/json
+
+{
+  "nombre": "Plato de prueba Gateway",
+  "descripcion": "Creado desde el archivo .http",
+  "precio": 29.90,
+  "disponible": true,
+  "categoriaId": 1
+}
+
+### Actualizar plato con token Chef (204)
+PUT {{host}}/gateway/platos/1
+Authorization: Bearer {{tokenChef}}
+Content-Type: application/json
+
+{
+  "nombre": "Ceviche clásico",
+  "descripcion": "Pescado fresco marinado en limón y ají",
+  "precio": 28.90,
+  "disponible": true,
+  "categoriaId": 1
+}
+
+### Crear plato con token Mesero (403)
+POST {{host}}/gateway/platos
+Authorization: Bearer {{tokenMesero}}
+Content-Type: application/json
+
+{
+  "nombre": "Plato Mesero",
+  "precio": 10.00,
+  "disponible": true,
+  "categoriaId": 1
+}
+
+### Eliminar plato con token Mesero (403)
+DELETE {{host}}/gateway/platos/1
+Authorization: Bearer {{tokenMesero}}
+
+### Plato inexistente (404)
+GET {{host}}/gateway/platos/999999
+
+### Reserva inexistente con token (404)
+GET {{host}}/gateway/reservas/999999
+Authorization: Bearer {{tokenChef}}
+
+### Ruta no configurada en el gateway (404)
+GET {{host}}/gateway/no-existe
+
+### Eliminar plato con token Chef (204)
+# Reemplace 1 por el id de un plato creado para la prueba.
+DELETE {{host}}/gateway/platos/1
+Authorization: Bearer {{tokenChef}}
+
+### 502 Bad Gateway
+# Detenga Reservas.Api y luego ejecute esta solicitud.
+GET {{host}}/gateway/reservas
+Authorization: Bearer {{tokenChef}}
+
+### Llamada directa al microservicio 2 sin token (401)
+GET http://localhost:5002/api/reservas

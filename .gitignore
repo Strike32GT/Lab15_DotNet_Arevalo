@@ -1,0 +1,31 @@
+# Compilación de .NET
+bin/
+obj/
+.vs/
+.idea/
+*.user
+*.suo
+
+# Configuración local con secretos (clave JWT y cadena de conexión)
+Restaurante.Api/appsettings.Development.json
+GatewayApi/appsettings.Development.json
+Reservas.Api/appsettings.Development.json
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/appsettings.*.local.json
+.env
+.env.*
+
+# Registros de las pruebas locales y artefactos de publicación
+logs/
+.publish/
+*.log
+*.pubxml
+
+# Documentos de trabajo y material de sustentación no destinado al repositorio
+GUION.md
+LAB-S15-EAREVALO-2026-2 hecho Fernando Mas.docx.md
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
